@@ -62,12 +62,19 @@ module ActiveRecord
     end
 
     def self.find_all(h={})
-      
       find_by_sql("select #{h[:distinct] ? 'distinct' : ''} * from #{table_name}")
     end
 
-    def self.natural_key
-      "#{table_name}_name"
+    def self.find_or_create(h={})
+      record = self.find(:all,
+        :conditions => h)
+      if record.length == 1
+        return record[0]
+      elsif record.length == 0
+        return self.create(h)
+      else
+        return record # hmmmmm.....
+      end
     end
 
     #
@@ -90,7 +97,6 @@ module ActiveRecord
     #   MyClass.finder(:myclass_name,"Abe  Lincoln") # hey why not!?
     #
     #   MyClass.finder(12) # just like .find()
-    
     def self.finder(v,val=nil)
       ckebug 1, v.class if defined? ckebug
       if v.is_a? String
